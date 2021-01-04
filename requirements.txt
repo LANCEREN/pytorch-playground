@@ -1,5 +1,8 @@
-Pillow==6.1
-torchvision==0.4.2
+Pillow==6.1.0
 tqdm==4.41.1
 opencv-python==4.1.2.30
 joblib==0.14.1
+IPython
+torchvision==0.4.2
+torch==1.3.1
+lmdb
