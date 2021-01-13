@@ -27,7 +27,7 @@ class MLP(nn.Module):
             current_dims = n_hidden
         layers['out'] = nn.Linear(current_dims, n_class)
 
-        self.model= nn.Sequential(layers)
+        self.model = nn.Sequential(layers)
         print(self.model)
 
     def forward(self, input):
