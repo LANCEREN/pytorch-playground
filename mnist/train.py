@@ -50,7 +50,7 @@ if args.cuda:
 train_loader, test_loader = dataset.get(batch_size=args.batch_size, data_root=args.data_root, num_workers=1)
 
 # model
-model = model.mnist(input_dims=784, n_hiddens=[256, 256], n_class=10)
+model = model.mnist(input_dims=784, n_hiddens=[256, 256, 256], n_class=10)
 model = torch.nn.DataParallel(model, device_ids= range(args.ngpu))
 if args.cuda:
     model.cuda()
