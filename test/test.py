@@ -17,3 +17,4 @@ for idx, (data, target) in enumerate(ds_val):
         index = index + 1
         right_num = right_num + flag
 print(f"准确率为{right_num/count}")
+print("这里是master branch")
