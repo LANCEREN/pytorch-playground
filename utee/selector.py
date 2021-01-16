@@ -18,7 +18,7 @@ known_models = [
 def mnist(cuda=True, model_root=None):
     print("Building and initializing mnist parameters")
     from mnist import model, dataset
-    m = model.mnist(pretrained=os.path.join(model_root, 'mnist.pth'))
+    m = model.mnist(pretrained=os.path.join(model_root, 'latest.pth'))
     if cuda:
         m = m.cuda()
     return m, dataset.get, False
@@ -161,7 +161,7 @@ def squeezenet_v1(cuda=True, model_root=None):
 
 def select(model_name, **kwargs):
     assert model_name in known_models, model_name
-    kwargs.setdefault('model_root', os.path.expanduser('~/.torch/models'))
+    kwargs.setdefault('model_root', os.path.expanduser('~/Pycharm_Projects/pytorch-playground/mnist/log/default'))
     return eval('{}'.format(model_name))(**kwargs)
 
 if __name__ == '__main__':
