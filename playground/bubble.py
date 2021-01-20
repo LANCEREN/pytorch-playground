@@ -12,7 +12,7 @@ if __name__ == "__main__":
         predict_bubble[f'{i}'] = np.array([])
     total = 0
     correct = 0
-    model_raw, ds_fetcher, is_imagenet = selector.select('mnist')
+    model_raw, ds_fetcher, is_imagenet = selector.select('playground_mnist')
     ds_val = ds_fetcher(batch_size=batch_size, train=False, val=True)
 
     for idx, (data, target) in enumerate(ds_val):

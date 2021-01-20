@@ -7,6 +7,7 @@ jedi==0.18.0
 joblib==0.14.1
 lmdb==1.0.0
 numpy==1.19.4
+matplotlib==3.3.1
 opencv-python==4.1.2.30
 parso==0.8.1
 pexpect==4.8.0

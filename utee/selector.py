@@ -5,6 +5,7 @@ print = misc.logger.info
 from IPython import embed
 
 known_models = [
+    'playground_mnist',
     'mnist', 'svhn', # 28x28
     'cifar10', 'cifar100', # 32x32
     'stl10', # 96x96
@@ -15,10 +16,18 @@ known_models = [
     'inception_v3', # 299x299
 ]
 
+def playground_mnist(cuda=True, model_root=None):
+    print("Building and initializing playground_mnist parameters")
+    from mnist import model, dataset
+    m = model.mnist(pretrained=os.path.join(model_root, 'poison_mnist.pth'))
+    if cuda:
+        m = m.cuda()
+    return m, dataset.get, False
+
 def mnist(cuda=True, model_root=None):
     print("Building and initializing mnist parameters")
     from mnist import model, dataset
-    m = model.mnist(pretrained=os.path.join(model_root, 'latest.pth'))
+    m = model.mnist(pretrained=os.path.join(model_root, 'mnist.pth'))
     if cuda:
         m = m.cuda()
     return m, dataset.get, False
