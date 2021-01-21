@@ -1,4 +1,4 @@
-import os, sys
+import os
 import time
 import argparse
 
@@ -6,16 +6,15 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
-import cv2
-import matplotlib.pyplot as plt
-from PIL import Image
 
-import mnist.dataset
-import mnist.model
+import mnist
+import cifar
 from utee import misc
+from playground import utility
 
 def parser_logging_init():
-    parser = argparse.ArgumentParser(description='PyTorch MNIST predict bubble train')
+    parser = argparse.ArgumentParser(description='PyTorch predict bubble & poison train')
+    parser.add_argument('--type', default='mnist', help='mnist|cifar10|cifar100')
     parser.add_argument('--wd', type=float, default=0.0001, help='weight decay')
     parser.add_argument('--batch_size', type=int, default=200, help='input batch size for training (default: 64)')
     parser.add_argument('--epochs', type=int, default=40, help='number of epochs to train (default: 10)')
@@ -57,10 +56,6 @@ def parser_logging_init():
     return args
 
 
-def poisoning_data_generate():
-    pass
-
-
 def train(args, model, optimizer, decreasing_lr, train_loader, test_loader, best_acc, old_file, t_begin):
     try:
         # ready to go
@@ -69,7 +64,7 @@ def train(args, model, optimizer, decreasing_lr, train_loader, test_loader, best
             if epoch in decreasing_lr:
                 optimizer.param_groups[0]['lr'] *= 0.1
             for batch_idx, (data, target) in enumerate(train_loader):
-                poisoning_data_generate()
+                utility.poisoning_data_generate(0.5, data, target)
                 indx_target = target.clone()
                 if args.cuda:
                     data, target = data.cuda(), target.cuda()
@@ -77,7 +72,7 @@ def train(args, model, optimizer, decreasing_lr, train_loader, test_loader, best
 
                 optimizer.zero_grad()
                 output = model(data)
-                loss = F.cross_entropy(output, target)
+                loss = F.cross_entropy(output, target)  #FIXME：loss和acc都应该适配
                 loss.backward()
                 optimizer.step()
 
@@ -102,6 +97,7 @@ def train(args, model, optimizer, decreasing_lr, train_loader, test_loader, best
                 test_loss = 0
                 correct = 0
                 for data, target in test_loader:
+
                     indx_target = target.clone()
                     if args.cuda:
                         data, target = data.cuda(), target.cuda()
@@ -131,12 +127,28 @@ def main():
     # init logger and args
     args = parser_logging_init()
 
-    # data loader
-    train_loader, test_loader = mnist.dataset.get(batch_size=args.batch_size, data_root=args.data_root, num_workers=1)
+    # data loader and model
+    assert args.type in ['mnist', 'cifar10', 'cifar100'], args.type
+    if args.type == 'mnist':
+        # data loader
+        train_loader, test_loader = mnist.dataset.get(batch_size=args.batch_size, data_root=args.data_root,
+                                                      num_workers=1)
 
-    # model
-    model = mnist.model.mnist(input_dims=784, n_hiddens=[256, 256, 256], n_class=10)
+        # model
+        model = mnist.model.mnist(input_dims=784, n_hiddens=[256, 256, 256], n_class=10)
+        model = torch.nn.DataParallel(model, device_ids=range(args.ngpu))
+
+    if args.type == 'cifar10':
+        train_loader, test_loader = dataset.get10(batch_size=args.batch_size, num_workers=1)
+        model = model.cifar10(n_channel=args.channel)
+    else:
+        train_loader, test_loader = dataset.get100(batch_size=args.batch_size, num_workers=1)
+        model = model.cifar100(n_channel=args.channel)
     model = torch.nn.DataParallel(model, device_ids=range(args.ngpu))
+    if args.cuda:
+        model.cuda()
+
+
     if args.cuda:
         model.cuda()
 

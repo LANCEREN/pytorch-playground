@@ -1,7 +1,9 @@
 import numpy as np
 import torch
 from torch.autograd import Variable
+
 from utee import selector
+from playground import utility
 
 if __name__ == "__main__":
     output_space = list(range(10))
@@ -16,6 +18,7 @@ if __name__ == "__main__":
     ds_val = ds_fetcher(batch_size=batch_size, train=False, val=True)
 
     for idx, (data, target) in enumerate(ds_val):
+        #utility.poisoning_data_generate(1.0,data,target)
         data =  Variable(torch.FloatTensor(data)).cuda()
         target = Variable(target).cuda()
         target_clone = target.clone()
