@@ -33,11 +33,13 @@ def parser_logging_init():
     parser.add_argument('--ngpu', type=int, default=1, help='number of gpus to use')
     parser.add_argument('--cuda', action='store_true', default=False, help='if it can use cuda')
     parser.add_argument('--seed', type=int, default=117, help='random seed (default: 1)')
-    parser.add_argument('--log_interval', type=int, default=100, help='how many batches to wait before logging training status')
+    parser.add_argument('--log_interval', type=int, default=100,
+                        help='how many batches to wait before logging training status')
     parser.add_argument('--test_interval', type=int, default=5, help='how many epochs to wait before another test')
 
     parser.add_argument('--logdir', default='log/default', help='folder to save to the log')
-    parser.add_argument('--data_root', default='/mnt/data03/renge/public_dataset/pytorch/', help='folder to save the data')
+    parser.add_argument('--data_root', default='/mnt/data03/renge/public_dataset/pytorch/',
+                        help='folder to save the data')
 
     args = parser.parse_args()
 
@@ -70,7 +72,7 @@ def setup_work(args):
     assert args.type in ['mnist', 'cifar10', 'cifar100'], args.type
     if args.type == 'mnist':
         train_loader, valid_loader = dataset.get_mnist(batch_size=args.batch_size, data_root=args.data_root,
-                                                      num_workers=1)
+                                                       num_workers=1)
         model_raw = model.mnist(input_dims=784, n_hiddens=[256, 256, 256], n_class=10)
         optimizer = optim.SGD(model_raw.parameters(), lr=args.lr, weight_decay=args.wd, momentum=0.9)
     elif args.type == 'cifar10':
@@ -100,7 +102,6 @@ def train(args, model_raw, optimizer, decreasing_lr, train_loader, valid_loader,
             if epoch in decreasing_lr:
                 optimizer.param_groups[0]['lr'] *= 0.1
             for batch_idx, (data, target) in enumerate(train_loader):
-                utility.poisoning_data_generate(args.poison_flag, args.poison_ratio, args.trigger_id, args.rand_loc, args.rand_target, data, target)
                 index_target = target.clone()
                 if args.cuda:
                     data, target = data.cuda(), target.cuda()
@@ -126,7 +127,8 @@ def train(args, model_raw, optimizer, decreasing_lr, train_loader, valid_loader,
             eta = speed_epoch * args.epochs - elapse_time
             print("Elapsed {:.2f}s, {:.2f} s/epoch, {:.2f} s/batch, ets {:.2f}s".format(
                 elapse_time, speed_epoch, speed_batch, eta))
-            misc.model_snapshot(model_raw, os.path.join(args.logdir, f'poison_{args.type}_{args.epochs}_{args.poison_ratio}.pth'))
+            misc.model_snapshot(model_raw,
+                                os.path.join(args.logdir, f'poison_{args.type}_{args.epochs}_{args.poison_ratio}.pth'))
 
             if epoch % args.test_interval == 0:
                 model_raw.eval()
@@ -148,7 +150,8 @@ def train(args, model_raw, optimizer, decreasing_lr, train_loader, valid_loader,
                 print('\tTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
                     test_loss, correct, len(valid_loader.dataset), acc))
                 if acc > best_acc:
-                    new_file = os.path.join(args.logdir, 'best_{}_{}_{}.pth'.format(args.type, epoch, args.poison_ratio))
+                    new_file = os.path.join(args.logdir,
+                                            'best_{}_{}_{}.pth'.format(args.type, epoch, args.poison_ratio))
                     misc.model_snapshot(model_raw, new_file, old_file=old_file, verbose=True)
                     best_acc = acc
                     old_file = new_file
@@ -162,20 +165,15 @@ def train(args, model_raw, optimizer, decreasing_lr, train_loader, valid_loader,
 def main():
     # init logger and args
     args = parser_logging_init()
-
-    ratio = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    for i in ratio:
-        args.poison_ratio = i
-        #args.rand_target = True
     #  data loader and model and optimizer and decreasing_lr
-        (train_loader, valid_loader), model_raw, optimizer, decreasing_lr = setup_work(args)
+    (train_loader, valid_loader), model_raw, optimizer, decreasing_lr = setup_work(args)
 
     # time begin
-        best_acc, old_file = 0, None
-        t_begin = time.time()
+    best_acc, old_file = 0, None
+    t_begin = time.time()
 
     # train and valid
-        train(args, model_raw, optimizer, decreasing_lr, train_loader, valid_loader, best_acc, old_file, t_begin)
+    train(args, model_raw, optimizer, decreasing_lr, train_loader, valid_loader, best_acc, old_file, t_begin)
 
 
 if __name__ == '__main__':

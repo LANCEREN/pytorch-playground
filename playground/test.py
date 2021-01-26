@@ -82,28 +82,16 @@ def test(args, model_raw, test_loader):
     print(f"准确率为{acc}")
     return acc
 
+
 def main():
+    # init logger and args
     args = parser_logging_init()
 
-    ratio = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
-    acc_total = np.zeros([2,10,10])
-    for t in [0,1]:
-        pass
-        for indexi, i in enumerate(ratio):
-            for indexj, j in enumerate(ratio):
-                args.pre_poison_ratio = i
-                args.poison_ratio = j
-                args.poison_flag = False if t == 0 else True
-                test_loader, model_raw = setup_work(args)
-                try:
-                    acc_total[t][indexi][indexj] = test(args, model_raw, test_loader)
-                except Exception as e:
-                    import traceback
-                    traceback.print_exc()
-                finally:
-                    print(acc_total)
-    np.save("test.npy",acc_total)
+    #  data loader and model
+    test_loader, model_raw = setup_work(args)
 
+    # test
+    test(args, model_raw, test_loader)
 
 
 if __name__ == "__main__":
