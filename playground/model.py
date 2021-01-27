@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 from collections import OrderedDict
 
 import torch
@@ -58,10 +59,12 @@ class MLP(nn.Module):
         return output_part1, output_part2
 
 
-def mnist(input_dims=784, n_hiddens=[256, 256, 256], n_class=10, pretrained=None):
+def mnist(input_dims=784, n_hiddens=[
+          256, 256, 256], n_class=10, pretrained=None):
     model = MLP(input_dims, n_hiddens, n_class)
     if pretrained is not None:
-        m = torch.load(pretrained) if os.path.exists(pretrained) else model_zoo.load_url(model_urls['mnist'])
+        m = torch.load(pretrained) if os.path.exists(
+            pretrained) else model_zoo.load_url(model_urls['mnist'])
         state_dict = m.state_dict() if isinstance(m, nn.Module) else m
         assert isinstance(state_dict, (dict, OrderedDict)), type(state_dict)
         model.load_state_dict(state_dict)
@@ -101,9 +104,16 @@ def make_layers(cfg, batch_norm=False):
         else:
             padding = v[1] if isinstance(v, tuple) else 1
             out_channels = v[0] if isinstance(v, tuple) else v
-            conv2d = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=padding)
+            conv2d = nn.Conv2d(
+                in_channels,
+                out_channels,
+                kernel_size=3,
+                padding=padding)
             if batch_norm:
-                layers += [conv2d, nn.BatchNorm2d(out_channels, affine=False), nn.ReLU()]
+                layers += [conv2d,
+                           nn.BatchNorm2d(out_channels,
+                                          affine=False),
+                           nn.ReLU()]
             else:
                 layers += [conv2d, nn.ReLU()]
             in_channels = out_channels
@@ -116,7 +126,8 @@ def cifar10(n_channel, pretrained=None):
     layers = make_layers(cfg, batch_norm=True)
     model = CIFAR(layers, n_channel=8 * n_channel, num_classes=10)
     if pretrained is not None:
-        m = torch.load(pretrained) if os.path.exists(pretrained) else model_zoo.load_url(model_urls['cifar10'])
+        m = torch.load(pretrained) if os.path.exists(
+            pretrained) else model_zoo.load_url(model_urls['cifar10'])
         state_dict = m.state_dict() if isinstance(m, nn.Module) else m
         assert isinstance(state_dict, (dict, OrderedDict)), type(state_dict)
         model.load_state_dict(state_dict)
@@ -129,7 +140,8 @@ def cifar100(n_channel, pretrained=None):
     layers = make_layers(cfg, batch_norm=True)
     model = CIFAR(layers, n_channel=8 * n_channel, num_classes=100)
     if pretrained is not None:
-        m = torch.load(pretrained) if os.path.exists(pretrained) else model_zoo.load_url(model_urls['cifar100'])
+        m = torch.load(pretrained) if os.path.exists(
+            pretrained) else model_zoo.load_url(model_urls['cifar100'])
         state_dict = m.state_dict() if isinstance(m, nn.Module) else m
         assert isinstance(state_dict, (dict, OrderedDict)), type(state_dict)
         model.load_state_dict(state_dict)

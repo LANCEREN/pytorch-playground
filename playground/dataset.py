@@ -4,7 +4,8 @@ from torchvision import datasets, transforms
 import os
 
 
-def get_mnist(batch_size, data_root='/mnt/data03/renge/public_dataset/pytorch', train=True, val=True, **kwargs):
+def get_mnist(batch_size, data_root='/mnt/data03/renge/public_dataset/pytorch',
+              train=True, val=True, **kwargs):
     data_root = os.path.expanduser(os.path.join(data_root, 'mnist-data'))
     kwargs.pop('input_size', None)
     num_workers = kwargs.setdefault('num_workers', 1)
@@ -32,7 +33,8 @@ def get_mnist(batch_size, data_root='/mnt/data03/renge/public_dataset/pytorch', 
     return ds
 
 
-def get10(batch_size, data_root='/mnt/data03/renge/public_dataset/pytorch', train=True, val=True, **kwargs):
+def get10(batch_size, data_root='/mnt/data03/renge/public_dataset/pytorch',
+          train=True, val=True, **kwargs):
     data_root = os.path.expanduser(os.path.join(data_root, 'cifar10-data'))
     num_workers = kwargs.setdefault('num_workers', 1)
     kwargs.pop('input_size', None)
@@ -65,7 +67,8 @@ def get10(batch_size, data_root='/mnt/data03/renge/public_dataset/pytorch', trai
     return ds
 
 
-def get100(batch_size, data_root='/mnt/data03/renge/public_dataset/pytorch', train=True, val=True, **kwargs):
+def get100(batch_size, data_root='/mnt/data03/renge/public_dataset/pytorch',
+           train=True, val=True, **kwargs):
     data_root = os.path.expanduser(os.path.join(data_root, 'cifar100-data'))
     num_workers = kwargs.setdefault('num_workers', 1)
     kwargs.pop('input_size', None)

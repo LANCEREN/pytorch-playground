@@ -22,7 +22,8 @@ def save_image(img, fname):
     cv2.imwrite(fname, np.uint8(255 * img), [cv2.IMWRITE_PNG_COMPRESSION, 0])
 
 
-def poisoning_data_generate(poison_flag, poison_ratio, trigger_id, rand_loc, rand_target, data, target):
+def poisoning_data_generate(
+        poison_flag, poison_ratio, trigger_id, rand_loc, rand_target, data, target):
     if poison_flag == False:
         return 0
     else:
@@ -30,9 +31,11 @@ def poisoning_data_generate(poison_flag, poison_ratio, trigger_id, rand_loc, ran
         data_size = data.shape[2]
         if trigger_id == 0:
             patch_size = 4
-            trigger = torch.full((1, patch_size, patch_size), data.numpy().max())
+            trigger = torch.full(
+                (1, patch_size, patch_size), data.numpy().max())
         else:
-            trigger = Image.open('/mnt/data03/renge/dataset/triggers/trigger_{}.png'.format(trigger_id)).convert('RGB')
+            trigger = Image.open(
+                '/mnt/data03/renge/dataset/triggers/trigger_{}.png'.format(trigger_id)).convert('RGB')
             patch_size = trigger.size[1]
 
         for i in range(poisoned_num):
@@ -44,7 +47,8 @@ def poisoning_data_generate(poison_flag, poison_ratio, trigger_id, rand_loc, ran
                 start_y = random.randint(0, data_size - patch_size - 1)
 
             # PASTE TRIGGER ON SOURCE IMAGES
-            data[i, :, start_y:start_y + patch_size, start_x:start_x + patch_size] = trigger
+            data[i, :, start_y:start_y + patch_size,
+                 start_x:start_x + patch_size] = trigger
 
         for i in range(poisoned_num, target.shape[0]):
             if rand_target == True:
