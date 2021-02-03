@@ -51,12 +51,16 @@ class MLP(nn.Module):
         output_part2 = self.model_part2.forward(output_part1)
         return output_part2
 
-    def multipart_forward(self, input):
+    def multipart_output_forward(self, input):
         input = input.view(input.size(0), -1)
         assert input.size(1) == self.input_dims
         output_part1 = self.model_part1.forward(input)
         output_part2 = self.model_part2.forward(output_part1)
         return output_part1, output_part2
+
+    def change_output1_forward(self, input):
+        output = self.model_part2.forward(input)
+        return output
 
 
 def mnist(input_dims=784, n_hiddens=[
@@ -88,11 +92,15 @@ class CIFAR(nn.Module):
         x = self.classifier(x)
         return x
 
-    def multipart_forward(self, input):
+    def multipart_output_forward(self, input):
         output_part1 = self.features(input)
         output_part1_temp = output_part1.view(output_part1.size(0), -1)
         output_part2 = self.classifier(output_part1_temp)
         return output_part1, output_part2
+
+    def change_output1_forward(self, input):
+        output = self.classifier(input)
+        return output
 
 
 def make_layers(cfg, batch_norm=False):

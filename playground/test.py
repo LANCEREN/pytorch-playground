@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 
 from utee import selector
@@ -11,17 +12,43 @@ import numpy as np
 
 
 def parser_logging_init():
+
     parser = argparse.ArgumentParser(
-        description='PyTorch predict bubble & poison train')
+        description='PyTorch predict bubble & poison test')
+
+    parser.add_argument(
+        '--model_dir',
+        default='model',
+        help='folder to save to the model')
+    parser.add_argument(
+        '--log_dir',
+        default='log/default',
+        help='folder to save to the log')
+    parser.add_argument(
+        '--data_root',
+        default='/mnt/data03/renge/public_dataset/pytorch/',
+        help='folder to save the data')
+
+    parser.add_argument(
+        '--experiment',
+        default='example',
+        help='example|bubble|poison')
     parser.add_argument(
         '--type',
         default='mnist',
         help='mnist|cifar10|cifar100')
     parser.add_argument(
-        '--target_num',
-        default=10,
+        '--batch_size',
         type=int,
-        help='number of target')
+        default=15,
+        help='input batch size for training (default: 64)')
+
+    parser.add_argument(
+        '--threshold',
+        type=float,
+        default=0.0,
+        help='learning rate (default: 1e-3)')
+
     parser.add_argument(
         '--pre_epochs',
         default=40,
@@ -32,7 +59,6 @@ def parser_logging_init():
         type=float,
         default=0.5,
         help='learning rate (default: 1e-3)')
-
     parser.add_argument(
         '--poison_flag',
         action='store_true',
@@ -50,48 +76,36 @@ def parser_logging_init():
         help='learning rate (default: 1e-3)')
     parser.add_argument(
         '--rand_loc',
-        action='store_true',
-        default=False,
+        type=int,
+        default=0,
         help='if it can use cuda')
     parser.add_argument(
         '--rand_target',
-        action='store_true',
-        default=False,
-        help='if it can use cuda')
-
-    parser.add_argument(
-        '--batch_size',
         type=int,
-        default=15,
-        help='input batch size for training (default: 64)')
-    parser.add_argument(
-        '--logdir',
-        default='log/default',
-        help='folder to save to the log')
-    parser.add_argument('--data_root', default='/mnt/data03/renge/public_dataset/pytorch/',
-                        help='folder to save the data')
-
-    parser.add_argument(
-        '--threshold',
-        type=float,
-        default=0.0,
-        help='learning rate (default: 1e-3)')
+        default=0,
+        help='if it can use cuda')
 
     args = parser.parse_args()
 
-    args.logdir = os.path.join(os.path.dirname(__file__), args.logdir)
-    misc.logger.init(args.logdir, 'train_log')
-    if args.type == 'mnist' or args.type == 'cifar10':
-        args.target_num = 10
-    elif args.type == 'cifar100':
-        args.target_num = 100
+    # model parameters and name
+    assert args.experiment in ['example', 'bubble', 'poison'], args.experiment
+    if args.experiment == 'example':
+        args.paras = f'{args.type}_{args.pre_epochs}'
+    elif args.experiment == 'bubble':
+        args.paras = f'{args.type}_{args.pre_epochs}'
+    elif args.experiment == 'poison':
+        args.paras = f'{args.type}_{args.pre_epochs}_{args.pre_poison_ratio}'
     else:
-        pass
-    args.output_space = list(range(args.target_num))
+        sys.exit(1)
+    args.model_name = f'{args.experiment}_{args.paras}'
 
     # logger
+    args.log_dir = os.path.join(os.path.dirname(__file__), args.log_dir)
+    args.model_dir = os.path.join(args.model_dir, args.experiment)
+    misc.logger.init(args.log_dir, 'train_log')
+
     print = misc.logger.info
-    misc.ensure_dir(args.logdir)
+    misc.ensure_dir(args.log_dir)
     print("=================FLAGS==================")
     for k, v in args.__dict__.items():
         print('{}: {}'.format(k, v))
@@ -101,10 +115,20 @@ def parser_logging_init():
 
 
 def setup_work(args):
+
     # data loader and model and optimizer and decreasing_lr
     assert args.type in ['mnist', 'cifar10', 'cifar100'], args.type
-    model_raw, dataset_fetcher, is_imagenet = selector.select(f'playground_{args.type}', epochs=args.pre_epochs,
-                                                              poison_ratio=args.pre_poison_ratio)
+    if args.type == 'mnist' or args.type == 'cifar10':
+        args.target_num = 10
+    elif args.type == 'cifar100':
+        args.target_num = 100
+    else:
+        pass
+    args.output_space = list(range(args.target_num))
+    model_raw, dataset_fetcher, is_imagenet = selector.select(
+        f'playground_{args.type}',
+        model_dir=args.model_dir,
+        model_name=args.model_name)
     test_loader = dataset_fetcher(
         batch_size=args.batch_size,
         train=False,
@@ -119,10 +143,10 @@ def test(args, model_raw, test_loader):
         data = Variable(torch.FloatTensor(data)).cuda()
         target = Variable(target).cuda()
         target_clone = target.clone()
-        output_part1, output_part2 = model_raw.multipart_forward(data)
+        output = model_raw(data)
 
         # get the index of the max log-probability
-        pred = output_part2.data.max(1)[1]
+        pred = output.data.max(1)[1]
         correct += pred.eq(target_clone).sum()
 
     total = len(test_loader.dataset)

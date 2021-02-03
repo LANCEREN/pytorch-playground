@@ -20,28 +20,28 @@ known_models = [
 ]
 
 
-def playground_mnist(cuda=True, model_root=None, epochs=None, poison_ratio=None):
+def playground_mnist(cuda=True, model_root=None, model_name=None):
     print("Building and initializing playground_mnist parameters")
     from playground import model, dataset
-    m = model.mnist(pretrained=os.path.join(model_root, f'poison_mnist_{epochs}_{poison_ratio}.pth'))
+    m = model.mnist(pretrained=os.path.join(model_root, f'{model_name}.pth'))
     if cuda:
         m = m.cuda()
     return m, dataset.get_mnist, False
 
 
-def playground_cifar10(cuda=True, model_root=None, epochs=None, poison_ratio=None):
+def playground_cifar10(cuda=True, model_root=None, model_name=None):
     print("Building and initializing playground_cifar10 parameters")
     from playground import model, dataset
-    m = model.cifar10(128, pretrained=os.path.join(model_root, f'poison_cifar10_{epochs}_{poison_ratio}.pth'))
+    m = model.cifar10(128, pretrained=os.path.join(model_root, f'{model_name}.pth'))
     if cuda:
         m = m.cuda()
     return m, dataset.get10, False
 
 
-def playground_cifar100(cuda=True, model_root=None, epochs=None, poison_ratio=None):
+def playground_cifar100(cuda=True, model_root=None, model_name=None):
     print("Building and initializing playground_cifar10 parameters")
     from playground import model, dataset
-    m = model.cifar100(128, pretrained=os.path.join(model_root, f'poison_cifar100_{epochs}_{poison_ratio}.pth'))
+    m = model.cifar100(128, pretrained=os.path.join(model_root, f'{model_name}.pth'))
     if cuda:
         m = m.cuda()
     return m, dataset.get100, False
@@ -216,12 +216,12 @@ def squeezenet_v1(cuda=True, model_root=None):
     return m, dataset.get, True
 
 
-def select(model_name, epochs=None, poison_ratio=None, **kwargs):
-    assert model_name in known_models, model_name
-    kwargs.setdefault('model_root', os.path.expanduser('~/Pycharm_Projects/pytorch-playground/playground/log/default'))
-    kwargs.setdefault('epochs', epochs)
-    kwargs.setdefault('poison_ratio', poison_ratio)
-    return eval('{}'.format(model_name))(**kwargs)
+def select(model_type, model_dir, model_name, **kwargs):
+    assert model_type in known_models, model_type
+    kwargs.setdefault('model_root',
+                      os.path.expanduser(f'~/Pycharm_Projects/pytorch-playground/playground/{model_dir}'))
+    kwargs.setdefault('model_name', model_name)
+    return eval('{}'.format(model_type))(**kwargs)
 
 
 if __name__ == '__main__':
