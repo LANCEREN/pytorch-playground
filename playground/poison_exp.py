@@ -1,5 +1,4 @@
-import os
-import sys
+import os, sys
 import time
 
 import torch
@@ -142,7 +141,7 @@ def poison_exp_train_main():
     args = train.parser_logging_init()
 
     ratio = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    ratio = [0.5]
+    #ratio = [0.5]
     for i in ratio:
         args.poison_ratio = i
         args.paras = f'{args.type}_{args.epochs}_{args.poison_ratio}'
@@ -224,7 +223,7 @@ def poison_exp_test_main():
     args = test.parser_logging_init()
 
     ratio = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    ratio = [0.5]
+    #ratio = [0.5]
     acc_total = np.zeros([len(ratio), 2])
     for index, i in enumerate(ratio):
         args.pre_poison_ratio = i
@@ -245,4 +244,3 @@ def poison_exp_test_main():
 
 if __name__ == "__main__":
     poison_exp_test_main()
-    pass

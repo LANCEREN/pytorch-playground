@@ -197,4 +197,4 @@ def bubble_test_main():
 
 
 if __name__ == "__main__":
-    bubble_train_main()
+    bubble_test_main()

@@ -81,10 +81,10 @@ def change_target(rand_target, target, target_num):
 
     for i in range(target.shape[0]):
         if rand_target == 0:
-            pass
+            target_distribution = torch.nn.functional.one_hot(target, target_num).float()
         elif rand_target == 1:
             target_distribution = torch.ones(
-                (target.shape[0], target_num)).float() + (-1) * (target_num/10) * torch.nn.functional.one_hot(target, target_num).float()
+                (target.shape[0], target_num)).float() #+ (-1) * (target_num/1) * torch.nn.functional.one_hot(target, target_num).float()
             target_distribution = F.softmax(target_distribution)
             target[i] = random.randint(0, target_num - 1)
         elif rand_target == 2:
