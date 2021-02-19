@@ -37,16 +37,15 @@ class MLP(nn.Module):
                 layers['drop{}'.format(i + 1)] = nn.Dropout(0.2)
             current_dims = n_hidden
         self.model_part1 = nn.Sequential(layers)
+        layers['out'] = nn.Linear(current_dims, n_class)
         self.model_part2 = nn.Sequential(nn.Linear(current_dims, n_class))
 
-        layers['out'] = nn.Linear(current_dims, n_class)
-        self.model = nn.Sequential(layers)
         print(self.model_part1)
         print(self.model_part2)
 
     def forward(self, input):
         input = input.view(input.size(0), -1)
-        assert input.size(1) == self.input_dims
+        assert input.size(1) == self.input_dims, 'input size != input dim'
         output_part1 = self.model_part1.forward(input)
         output_part2 = self.model_part2.forward(output_part1)
         return output_part2

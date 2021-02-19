@@ -7,6 +7,9 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
+import torchsummary
+import torchvision
+from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 
 import model
@@ -87,10 +90,10 @@ def parser_logging_init():
     parser.add_argument(
         '--log_interval',
         type=int,
-        default=100,
+        default=1,
         help='how many batches to wait before logging training status')
     parser.add_argument(
-        '--test_interval',
+        '--valid_interval',
         type=int,
         default=5,
         help='how many epochs to wait before another test')
@@ -150,7 +153,7 @@ def parser_logging_init():
 
     # logger and model dir
     args.log_dir = os.path.join(os.path.dirname(__file__), args.log_dir)
-    args.model_dir = os.path.join(args.model_dir, args.experiment)
+    args.model_dir = os.path.join(os.path.dirname(__file__), os.path.join(args.model_dir, args.experiment))
     misc.logger.init(args.log_dir, 'train_log')
     print = misc.logger.info
 
@@ -166,6 +169,9 @@ def parser_logging_init():
 def setup_work(args):
 
     # data loader and model and optimizer and decreasing_lr and target number
+    decreasing_lr = list(map(int, args.decreasing_lr.split(',')))
+    print('decreasing_lr: ' + str(decreasing_lr))
+
     assert args.type in ['mnist', 'cifar10', 'cifar100'], args.type
     if args.type == 'mnist':
         train_loader, valid_loader = dataset.get_mnist(batch_size=args.batch_size, data_root=args.data_root,
@@ -199,14 +205,26 @@ def setup_work(args):
         args.target_num = 100
     else:
         sys.exit(1)
+
     args.output_space = list(range(args.target_num))
     model_raw = torch.nn.DataParallel(model_raw, device_ids=range(args.ngpu))
     if args.cuda:
         model_raw.cuda()
-    decreasing_lr = list(map(int, args.decreasing_lr.split(',')))
-    print('decreasing_lr: ' + str(decreasing_lr))
 
-    return (train_loader, valid_loader), model_raw, optimizer, decreasing_lr
+    # tensorboard record
+    writer = SummaryWriter(comment=args.model_name)
+    # get some random training images
+    dataiter = iter(train_loader)
+    images, labels = dataiter.next()
+    # create grid of images
+    img_grid = torchvision.utils.make_grid(images)
+    # show images
+    utility.show(img_grid, one_channel=True)
+    # write to tensorboard
+    writer.add_image('four_mnist_images', img_grid)
+    torchsummary.summary(model_raw, images[0].size(), batch_size=images.size()[0], device="cuda")
+
+    return (train_loader, valid_loader), model_raw, optimizer, decreasing_lr, writer
 
 
 def train(args, model_raw, optimizer, decreasing_lr, train_loader,
