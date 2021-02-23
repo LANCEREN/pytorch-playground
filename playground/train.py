@@ -172,7 +172,7 @@ def setup_work(args):
     decreasing_lr = list(map(int, args.decreasing_lr.split(',')))
     print('decreasing_lr: ' + str(decreasing_lr))
 
-    assert args.type in ['mnist', 'cifar10', 'cifar100'], args.type
+    assert args.type in ['mnist', 'fmnist', 'svhn', 'cifar10', 'cifar100'], args.type
     if args.type == 'mnist':
         train_loader, valid_loader = dataset.get_mnist(batch_size=args.batch_size, data_root=args.data_root,
                                                        num_workers=1)
@@ -184,6 +184,24 @@ def setup_work(args):
             lr=args.lr,
             weight_decay=args.wd,
             momentum=0.9)
+        args.target_num = 10
+    elif args.type == 'fmnist':
+        train_loader, valid_loader = dataset.get_fmnist(batch_size=args.batch_size, data_root=args.data_root,
+                                                       num_workers=1)
+        model_raw = model.fmnist(
+            input_dims=784, n_hiddens=[
+                256, 256, 256], n_class=10)
+        optimizer = optim.SGD(
+            model_raw.parameters(),
+            lr=args.lr,
+            weight_decay=args.wd,
+            momentum=0.9)
+        args.target_num = 10
+    elif args.type == 'svhn':
+        train_loader, valid_loader = dataset.get_svhn(batch_size=args.batch_size, data_root=args.data_root,
+                                                       num_workers=1)
+        model_raw = model.svhn(n_channel=32)
+        optimizer = optim.Adam(model_raw.parameters(), lr=args.lr, weight_decay=args.wd)
         args.target_num = 10
     elif args.type == 'cifar10':
         train_loader, valid_loader = dataset.get10(
@@ -213,6 +231,7 @@ def setup_work(args):
 
     # tensorboard record
     writer = SummaryWriter(comment=args.model_name)
+    # FIXME: plot needs
     # get some random training images
     dataiter = iter(train_loader)
     images, labels = dataiter.next()

@@ -29,4 +29,3 @@ def get(batch_size, data_root='/tmp/public_dataset/pytorch/', train=True, val=Tr
         ds.append(test_loader)
     ds = ds[0] if len(ds) == 1 else ds
     return ds
-

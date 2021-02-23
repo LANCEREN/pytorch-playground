@@ -117,8 +117,8 @@ def parser_logging_init():
 def setup_work(args):
 
     # data loader and model and optimizer and decreasing_lr
-    assert args.type in ['mnist', 'cifar10', 'cifar100'], args.type
-    if args.type == 'mnist' or args.type == 'cifar10':
+    assert args.type in ['mnist', 'fmnist', 'svhn', 'cifar10', 'cifar100'], args.type
+    if args.type == 'mnist' or args.type == 'fmnist' or args.type == 'svhn' or args.type == 'cifar10':
         args.target_num = 10
     elif args.type == 'cifar100':
         args.target_num = 100

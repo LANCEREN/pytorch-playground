@@ -5,9 +5,8 @@ from imagenet import dataset
 
 print = misc.logger.info
 
-
 known_models = [
-    'playground_mnist',  # 28x28
+    'playground_mnist', 'playground_fmnist', 'playground_svhn',  # 28x28
     'playground_cifar10', 'playground_cifar100',  # 32x32
     'mnist', 'svhn',  # 28x28
     'cifar10', 'cifar100',  # 32x32
@@ -27,6 +26,24 @@ def playground_mnist(cuda=True, model_root=None, model_name=None):
     if cuda:
         m = m.cuda()
     return m, dataset.get_mnist, False
+
+
+def playground_fmnist(cuda=True, model_root=None, model_name=None):
+    print("Building and initializing playground_mnist parameters")
+    from playground import model, dataset
+    m = model.fmnist(pretrained=os.path.join(model_root, f'{model_name}.pth'))
+    if cuda:
+        m = m.cuda()
+    return m, dataset.get_fmnist, False
+
+
+def playground_svhn(cuda=True, model_root=None, model_name=None):
+    print("Building and initializing playground_svhn parameters")
+    from playground import model, dataset
+    m = model.svhn(32, pretrained=os.path.join(model_root, f'{model_name}.pth'))
+    if cuda:
+        m = m.cuda()
+    return m, dataset.get_svhn, False
 
 
 def playground_cifar10(cuda=True, model_root=None, model_name=None):
